@@ -1,13 +1,17 @@
 #!/usr/bin/python
-import polib, sys, os, random
+import polib, sys, os, random, subprocess
 
+if not os.path.isfile(sys.argv[1]):
+    sys.exit(0)
 po_file = sys.argv[1]
+if not os.path.exists(sys.argv[2]):
+    sys.exit(0)
+folder = sys.argv[2]
+
 po = polib.pofile(po_file)
 temp_name = '/tmp/temp_' + str(random.randint(0, 999)) + '.po'
 os.system('cp ' + sys.argv[1] + ' ' + temp_name)
 headers = po.ordered_metadata()
-# TODO: add a parameter for the folder where scan
-folder = '/var/www/VVV/www/demo/htdocs/wp-content/plugins/glossary-pro/'
 
 
 def is_excluded(folder, file, excluded):
@@ -18,6 +22,28 @@ def is_excluded(folder, file, excluded):
         elif exclude in folder:
             return True
     return False
+
+
+def replace_headers(original, updated):
+    with open(original, 'r') as infile:
+        headers = []
+        for line in infile:
+            headers.append(line)
+            if line.startswith('#:'):
+                 break
+        infile.close()
+    with open(updated, 'r+') as outfile:
+        i = 0
+        for line in outfile:
+            i += 1
+            if line.startswith('#:'):
+                 break
+        lines = list(outfile)
+        del lines[i - 1]
+        lines = headers + lines
+        outfile.write("\n".join(lines))
+        outfile.close()
+
 
 files_list = ''
 excluded = []
@@ -38,12 +64,15 @@ for root, dirs, files in os.walk(folder):
             if file.endswith('.php'):
                 files_list += os.path.join(root, file) + ' '
 
-command = 'xgettext ' + keyword + ' --force-po --add-comments --from-code=UTF-8'
+command = 'xgettext ' + keyword + ' --force-po --from-code=UTF-8'
 command += ' --output=' + temp_name + ' ' + files_list
-command += ' | msgmerge -N -U ' + po_file + ' ' + temp_name
-os.system(command)
 
-# TODO: Keep headers
+p = subprocess.check_output(command, shell=True)
+command = 'msgmerge -N -U ' + po_file + ' ' + temp_name + ' > /dev/null'
+p = subprocess.check_output(command, shell=True)
+command = 'msguniq ' + temp_name + ' -o ' + po_file + ' > /dev/null'
+p = subprocess.check_output(command, shell=True)
+replace_headers(po_file, temp_name)
 
-command = 'mv ' + temp_name + ' ' + po_file
-os.system(command)
+#command = 'mv ' + temp_name + ' ' + po_file
+#os.system(command)
