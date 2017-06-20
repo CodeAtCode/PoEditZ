@@ -6,6 +6,7 @@ po = polib.pofile(po_file)
 temp_name = '/tmp/temp_' + str(random.randint(0, 999)) + '.po'
 os.system('cp ' + sys.argv[1] + ' ' + temp_name)
 headers = po.ordered_metadata()
+# TODO: add a parameter for the folder where scan
 folder = '/var/www/VVV/www/demo/htdocs/wp-content/plugins/glossary-pro/'
 
 
