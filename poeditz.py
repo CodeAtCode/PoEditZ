@@ -25,23 +25,26 @@ def is_excluded(folder, file, excluded):
 
 
 def replace_headers(original, updated):
-    with open(original, 'r') as infile:
-        headers = []
-        for line in infile:
-            headers.append(line)
-            if line.startswith('#:'):
-                 break
-        infile.close()
-    with open(updated, 'r+') as outfile:
+        with open(original, 'r') as infile:
+            headers = []
+            for line in infile:
+                headers.append(line)
+                if line.startswith('#:'):
+                     break
+            infile.close()
+        outfile = open(updated, 'r')
         i = 0
         for line in outfile:
             i += 1
             if line.startswith('#:'):
-                 break
+                break
         lines = list(outfile)
+        outfile.close()
+        outfile = open(updated, 'w')
         del lines[i - 1]
         lines = headers + lines
-        outfile.write("\n".join(lines))
+        lines = "\n".join(lines)
+        outfile.write(lines)
         outfile.close()
 
 
@@ -66,13 +69,22 @@ for root, dirs, files in os.walk(folder):
 
 command = 'xgettext ' + keyword + ' --force-po --from-code=UTF-8'
 command += ' --output=' + temp_name + ' ' + files_list
+p = subprocess.check_output(command, shell=True)
 
+command = 'msgmerge -N -U ' + po_file + ' ' + temp_name + ' 2>/dev/null'
 p = subprocess.check_output(command, shell=True)
-command = 'msgmerge -N -U ' + po_file + ' ' + temp_name + ' > /dev/null'
+
+# Fix warning
+command = 'sed --in-place ' + temp_name + ' --expression=s/CHARSET/UTF-8/'
 p = subprocess.check_output(command, shell=True)
-command = 'msguniq ' + temp_name + ' -o ' + po_file + ' > /dev/null'
+
+command = 'msguniq ' + temp_name + ' -o ' + temp_name + ' 2>&1'
 p = subprocess.check_output(command, shell=True)
+
 replace_headers(po_file, temp_name)
 
-#command = 'mv ' + temp_name + ' ' + po_file
-#os.system(command)
+command = 'mv ' + temp_name + ' ' + po_file
+os.system(command)
+
+command = 'rm ' + po_file + '~'
+os.system(command)
