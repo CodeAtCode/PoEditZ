@@ -25,7 +25,9 @@ keyword = ''
 for (header, value) in headers:
     if header.startswith('X-Poedit'):
         if header.startswith('X-Poedit-KeywordsList'):
-            keyword = '--keyword=' + value.replace(';', ',') + ''
+            keywords = value.split(';')
+            for single in keywords:
+                keyword += '--keyword="' + single + '" '
         if header.startswith('X-Poedit-SearchPathExcluded'):
             excluded.append(value)
 
@@ -35,11 +37,11 @@ for root, dirs, files in os.walk(folder):
             if file.endswith('.php'):
                 files_list += os.path.join(root, file) + ' '
 
-command = 'xgettext ' + keyword + ' --force-po --debug -c --join-existing'
+command = 'xgettext ' + keyword + ' --force-po --join-existing'
 command += ' --output=' + temp_name + ' ' + files_list
 command += ' | msgmerge -N ' + po_file + ' ' + temp_name
 command += ' --output=' + temp_name + ' > /dev/null'
 os.system(command)
 
-command = 'mv ' + temp_name + ' ' + po_file
+#command = 'mv ' + temp_name + ' ' + po_file
 os.system(command)
