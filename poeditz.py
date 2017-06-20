@@ -37,11 +37,12 @@ for root, dirs, files in os.walk(folder):
             if file.endswith('.php'):
                 files_list += os.path.join(root, file) + ' '
 
-command = 'xgettext ' + keyword + ' --force-po --join-existing'
+command = 'xgettext ' + keyword + ' --force-po --add-comments --from-code=UTF-8'
 command += ' --output=' + temp_name + ' ' + files_list
-command += ' | msgmerge -N ' + po_file + ' ' + temp_name
-command += ' --output=' + temp_name + ' > /dev/null'
+command += ' | msgmerge -N -U ' + po_file + ' ' + temp_name
 os.system(command)
 
-#command = 'mv ' + temp_name + ' ' + po_file
+# TODO: Keep headers
+
+command = 'mv ' + temp_name + ' ' + po_file
 os.system(command)
