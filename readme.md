@@ -1,7 +1,7 @@
 # PoEditZ
 
 A simple Python wrapper that support custom headers of [PoEdit](https://github.com/vslavik/poedit) useful to generate by CLI a new file po.  
-In few words I want to update my po files by a script I can do it because supporth e PoEdit headers for exclude files and keywords automatically.
+This script use [wp-cli i18n](https://github.com/wp-cli/i18n-command) to generate the file pot that automatically exclude files based on the PoEdit headers.
 
 # How to
 
