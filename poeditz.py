@@ -13,6 +13,22 @@ temp_name = '/tmp/temp_' + str(random.randint(0, 999)) + '.po'
 os.system('cp ' + sys.argv[1] + ' ' + temp_name)
 headers = po.ordered_metadata()
 
+
+def reinsert_headers(original, updated):
+        generated = open(updated, 'r')
+        content = generated.read().splitlines()
+        with open(original, 'r') as infile:
+            for line in infile:
+                if line.startswith('"X-Poedit'):
+                    content.insert(4, line.replace('\n', ' ').replace('\r', ''))
+                if line.startswith('#:'):
+                    break
+            infile.close()
+        final = open(po_file, 'w')
+        final.write("\n".join(content))
+        final.close()
+
+
 excluded = ''
 
 for (header, value) in headers:
@@ -23,8 +39,4 @@ command = 'wp i18n make-pot ' + folder + ' ' + temp_name + ' --skip-js --exclude
 print(command)
 p = subprocess.check_output(command, shell=True)
 
-command = 'mv ' + temp_name + ' ' + po_file
-os.system(command)
-
-command = 'rm ' + po_file + '~'
-os.system(command)
+reinsert_headers(po_file, temp_name)
