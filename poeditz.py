@@ -35,8 +35,7 @@ for (header, value) in headers:
     if header.startswith('X-Poedit-SearchPathExcluded'):
         excluded += value + ','
 
-command = 'wp i18n make-pot ' + folder + ' ' + temp_name + ' --skip-js --exclude=' + excluded
-print(command)
+command = 'wp i18n make-pot ' + folder + ' ' + temp_name + ' --skip-js --exclude=' + excluded + ' --merge=' + po_file
 p = subprocess.check_output(command, shell=True)
 
 reinsert_headers(po_file, temp_name)
